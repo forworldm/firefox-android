@@ -4,6 +4,15 @@
 
 package org.mozilla.fenix.addons
 
+import java.util.*
+import android.net.Uri
+import android.widget.*
+import android.view.*
+import android.view.ViewGroup.LayoutParams.*
+import android.text.InputType.*
+import androidx.appcompat.app.AlertDialog
+import androidx.core.widget.addTextChangedListener
+
 import android.content.Context
 import android.graphics.Typeface
 import android.graphics.fonts.FontStyle.FONT_WEIGHT_MEDIUM
@@ -63,11 +72,59 @@ class AddonsManagementFragment : Fragment(R.layout.fragment_add_ons_management) 
                 adapter?.updateAddon(it)
             }
         }
+        bindAddonButton()
     }
 
     override fun onResume() {
         super.onResume()
         showToolbar(getString(R.string.preferences_addons))
+    }
+
+    private fun bindAddonButton() {
+        binding?.addOnsManagementInstall?.setOnClickListener {
+            val ctx = requireActivity()
+            val input = EditText(ctx)
+            input.inputType = TYPE_CLASS_TEXT or TYPE_TEXT_VARIATION_URI
+            input.layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+            val dialog = AlertDialog.Builder(requireActivity())
+                .setTitle(R.string.mozac_feature_addons_install_addon_content_description)
+                .setView(input)
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    val addon = Addon(
+                        id = UUID.randomUUID().toString(),
+                        downloadUrl = input.text.toString()
+                    )
+                    requireContext().components.addonManager.installAddon(url = addon.downloadUrl, onSuccess = {
+                        Toast.makeText(
+                            ctx, getString(
+                                R.string.mozac_feature_addons_successfully_installed,
+                                addon.downloadUrl
+                            ), Toast.LENGTH_SHORT
+                        ).show()
+                    }, onError = { _ ->
+                        Toast.makeText(
+                            ctx,
+                            getString(
+                                R.string.mozac_feature_addons_failed_to_install,
+                                addon.downloadUrl
+                            ),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    })
+                }.setNegativeButton(android.R.string.cancel) { _, _ -> }
+                .create()
+            input.addTextChangedListener(afterTextChanged = {
+                val url = Uri.parse(it.toString())
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = when (url.scheme) {
+                    "https", "http" -> !url.host.isNullOrEmpty()
+                    else -> false
+                }
+            })
+            dialog.setOnShowListener {
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = false
+            }
+            dialog.show()
+        }
     }
 
     override fun onDestroyView() {
@@ -92,7 +149,7 @@ class AddonsManagementFragment : Fragment(R.layout.fragment_add_ons_management) 
 
         lifecycleScope.launch(IO) {
             try {
-                addons = requireContext().components.addonManager.getAddons()
+                addons = requireContext().components.addonManager.getAllAddons()
                 // Add-ons that should be excluded in Mozilla Online builds
                 val excludedAddonIDs = if (Config.channel.isMozillaOnline &&
                     !BuildConfig.MOZILLA_ONLINE_ADDON_EXCLUSIONS.isNullOrEmpty()
