@@ -101,7 +101,7 @@ class DefaultBookmarkController(
         val flags = EngineSession.LoadUrlFlags.select(EngineSession.LoadUrlFlags.ALLOW_JAVASCRIPT_URL)
         openInNewTabAndShow(
             item.url!!,
-            isPrivate || fromHomeFragment,
+            true || isPrivate || fromHomeFragment,
             BrowserDirection.FromBookmarks,
             activity.browsingModeManager.mode,
             flags,
