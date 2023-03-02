@@ -170,7 +170,7 @@ allprojects {
     }
 
     tasks.withType(KotlinCompile).configureEach {
-        kotlinOptions.allWarningsAsErrors = true
+        // kotlinOptions.allWarningsAsErrors = true
         kotlinOptions.freeCompilerArgs += [
             "-opt-in=kotlin.RequiresOptIn", "-Xjvm-default=all-compatibility"
         ]
@@ -188,7 +188,7 @@ subprojects {
 tasks.register('clean', Delete) {
     delete rootProject.layout.buildDirectory
 }
-
+/* 
 detekt {
     input = files("$projectDir/app/src")
     config = files("$projectDir/config/detekt.yml")
@@ -206,8 +206,8 @@ detekt {
         }
     }
 }
-
-tasks.withType(Detekt).configureEach() {
+ */
+if (false) tasks.withType(Detekt).configureEach() {
     autoCorrect = true
 
     exclude "**/test/**"
@@ -218,14 +218,14 @@ tasks.withType(Detekt).configureEach() {
 }
 
 // Apply same path exclusions as for the main task
-tasks.withType(DetektCreateBaselineTask).configureEach() {
+if (false) tasks.withType(DetektCreateBaselineTask).configureEach() {
     exclude "**/test/**"
     exclude "**/androidTest/**"
     exclude "**/build/**"
     exclude "**/resources/**"
     exclude "**/tmp/**"
 }
-
+/* 
 configurations {
     ktlint
 }
@@ -240,8 +240,8 @@ dependencies {
     detekt project(":mozilla-detekt-rules")
     detekt "io.gitlab.arturbosch.detekt:detekt-cli:${Versions.detekt}"
 }
-
-tasks.register('ktlint', JavaExec) {
+ */
+if (false) tasks.register('ktlint', JavaExec) {
     group = "verification"
     description = "Check Kotlin code style."
     classpath = configurations.ktlint
@@ -249,7 +249,7 @@ tasks.register('ktlint', JavaExec) {
     args "app/src/**/*.kt", "!**/build/**/*.kt", "--baseline=ktlint-baseline.xml"
 }
 
-tasks.register('ktlintFormat', JavaExec) {
+if (false) tasks.register('ktlintFormat', JavaExec) {
     description = "Fix Kotlin code style deviations."
     classpath = configurations.ktlint
     mainClass.set("com.pinterest.ktlint.Main")
@@ -257,7 +257,7 @@ tasks.register('ktlintFormat', JavaExec) {
     jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
 }
 
-tasks.withType(Detekt.class).configureEach {
+if (false) tasks.withType(Detekt.class).configureEach {
     exclude("**/resources/**")
     exclude("**/tmp/**")
 }

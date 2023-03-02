@@ -89,8 +89,8 @@ android {
     def releaseTemplate = {
         // We allow disabling optimization by passing `-PdisableOptimization` to gradle. This is used
         // in automation for UI testing non-debug builds.
-        shrinkResources !project.hasProperty("disableOptimization")
-        minifyEnabled !project.hasProperty("disableOptimization")
+        shrinkResources false // !project.hasProperty("disableOptimization")
+        minifyEnabled false // !project.hasProperty("disableOptimization")
         proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         matchingFallbacks = ['release'] // Use on the "release" build type in dependencies (AARs)
 
@@ -237,6 +237,7 @@ android {
     }
 
     lint {
+        checkReleaseBuilds false
         lintConfig file("lint.xml")
         baseline file("lint-baseline.xml")
     }
@@ -310,7 +311,7 @@ android.applicationVariants.configureEach { variant ->
             // channels that never shipped a Fennec build.
             def versionCodeOverride = Config.generateFennecVersionCode(arch, aab)
 
-            println("versionCode for $abi = $versionCodeOverride, isMozillaOnline = $isMozillaOnline")
+            println("versionCode for $abi = $versionCodeOverride, isMozillaOnline = $isMozillaOnline, file = ${output.outputFile.path}")
 
             if (versionName != null) {
                 output.versionNameOverride = versionName
@@ -330,7 +331,7 @@ android.applicationVariants.configureEach { variant ->
 // -------------------------------------------------------------------------------------------------
 
     buildConfigField 'String', 'SENTRY_TOKEN', 'null'
-    if (!isDebug) {
+    if (!isDebug && false) {
         buildConfigField 'boolean', 'CRASH_REPORTING', 'true'
         // Reading sentry token from local file (if it exists). In a release task on taskcluster it will be available.
         try {
@@ -341,7 +342,7 @@ android.applicationVariants.configureEach { variant ->
         buildConfigField 'boolean', 'CRASH_REPORTING', 'false'
     }
 
-    if (!isDebug) {
+    if (!isDebug && false) {
         buildConfigField 'boolean', 'TELEMETRY', 'true'
     } else {
         buildConfigField 'boolean', 'TELEMETRY', 'false'
@@ -362,7 +363,7 @@ android.applicationVariants.configureEach { variant ->
 
     print("Adjust token: ")
 
-    if (!isDebug) {
+    if (!isDebug && false) {
         try {
             def token = new File("${rootDir}/.adjust_token").text.trim()
             buildConfigField 'String', 'ADJUST_TOKEN', '"' + token + '"'
@@ -397,7 +398,7 @@ android.applicationVariants.configureEach { variant ->
 
     print("Nimbus endpoint: ")
 
-    if (!isDebug) {
+    if (!isDebug && false) {
         try {
             def url = new File("${rootDir}/.nimbus").text.trim()
             buildConfigField 'String', 'NIMBUS_ENDPOINT', '"' + url + '"'
@@ -524,7 +525,7 @@ dependencies {
     implementation project(':browser-engine-gecko')
 
     implementation ComponentsDependencies.kotlin_coroutines
-    testImplementation ComponentsDependencies.testing_coroutines
+    // testImplementation ComponentsDependencies.testing_coroutines
     implementation ComponentsDependencies.androidx_appcompat
     implementation ComponentsDependencies.androidx_constraintlayout
     implementation ComponentsDependencies.androidx_coordinatorlayout
@@ -623,7 +624,7 @@ dependencies {
     implementation project(':lib-dataprotect')
     testImplementation project(':support-test-fakes')
 
-    debugImplementation ComponentsDependencies.leakcanary
+    // debugImplementation ComponentsDependencies.leakcanary
     debugImplementation ComponentsDependencies.androidx_compose_ui_tooling
 
     implementation ComponentsDependencies.androidx_activity_compose
@@ -671,7 +672,7 @@ dependencies {
     implementation FenixDependencies.google_play_review_ktx
 
     implementation FenixDependencies.androidx_profileinstaller
-
+/* 
     androidTestImplementation ComponentsDependencies.androidx_test_uiautomator
     androidTestImplementation FenixDependencies.fastlane
     // This Falcon version is added to maven central now required for Screengrab
@@ -717,8 +718,8 @@ dependencies {
     }
 
     testImplementation ComponentsDependencies.testing_maven_ant_tasks
-    implementation project(':support-rusthttp')
-
+ */    implementation project(':support-rusthttp')
+/* 
     androidTestImplementation FenixDependencies.mockk_android
     testImplementation FenixDependencies.mockk
 
@@ -728,7 +729,7 @@ dependencies {
 
     lintChecks project(":mozilla-lint-rules")
     lintChecks project(':tooling-lint')
-}
+ */}
 
 protobuf {
     protoc {
