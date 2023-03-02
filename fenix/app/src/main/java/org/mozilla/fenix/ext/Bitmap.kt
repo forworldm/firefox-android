@@ -45,7 +45,7 @@ fun Bitmap.scaleToBottomOfView(view: ImageView) {
                 // guaranteed to be shown.
                 // Majority of this math borrowed from // https://medium.com/@tokudu/how-to-whitelist-strictmode-violations-on-android-based-on-stacktrace-eb0018e909aa
                 // except that there is no need to translate horizontally in our case.
-                matrix.postTranslate(0f, (viewHeight - bitmapHeight * scale))
+                matrix.postTranslate((viewWidth - bitmapWidth * scale) / 2, (viewHeight - bitmapHeight * scale))
                 view.imageMatrix = matrix
                 view.removeOnLayoutChangeListener(this)
             }

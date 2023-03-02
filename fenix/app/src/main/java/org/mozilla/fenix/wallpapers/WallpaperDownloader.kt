@@ -64,7 +64,7 @@ class WallpaperDownloader(
         wallpaper: Wallpaper,
         imageType: Wallpaper.ImageType,
     ): Wallpaper.ImageFileState = withContext(dispatcher) {
-        val localFile = File(storageRootDirectory, getLocalPath(wallpaper.name, imageType))
+        val localFile = getLocalPath(storageRootDirectory, wallpaper.name, imageType)
         if (localFile.exists()) {
             return@withContext Wallpaper.ImageFileState.Downloaded
         }

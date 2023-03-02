@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Environment
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -136,7 +137,25 @@ class WallpapersUseCases(
                 wallpaper.copy(thumbnailFileState = result)
             }
 
-            val defaultIncluded = listOf(Wallpaper.Default) + wallpapersWithUpdatedThumbnailState
+            val defaultIncluded = listOf(Wallpaper.Default) + wallpapersWithUpdatedThumbnailState + (
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                        .listFiles()?.filter {
+                            val name = it.name.lowercase()
+                            name.endsWith(".jpg") || name.endsWith(".png")
+                                    || name.endsWith(".bmp") || name.endsWith(".gif")
+                                    || name.endsWith(".webp") || name.endsWith(".avif")
+                                    || name.endsWith(".heic") || name.endsWith(".heif")
+                        }?.map {
+                            Wallpaper(
+                                name = it.path,
+                                collection = Wallpaper.LocalCollection,
+                                textColor = null,
+                                cardColorLight = null,
+                                cardColorDark = null,
+                                thumbnailFileState = Wallpaper.ImageFileState.Downloaded,
+                                assetsFileState = Wallpaper.ImageFileState.Downloaded,
+                            )
+                        } ?: emptyList())
             appStore.dispatch(AppAction.WallpaperAction.UpdateAvailableWallpapers(defaultIncluded))
         }
 
@@ -177,9 +196,8 @@ class WallpapersUseCases(
             wallpaper: Wallpaper,
             orientation: Int,
         ): Bitmap? = Result.runCatching {
-            val path = wallpaper.getLocalPathFromContext(orientation)
+            val file = wallpaper.getLocalPathFromContext(orientation)
             withContext(Dispatchers.IO) {
-                val file = File(getFilesDir(), path)
                 BitmapFactory.decodeStream(file.inputStream())
             }
         }.getOrNull()
@@ -188,13 +206,13 @@ class WallpapersUseCases(
          * Get the expected local path on disk for a wallpaper. This will differ depending
          * on orientation and app theme.
          */
-        private fun Wallpaper.getLocalPathFromContext(orientation: Int): String {
+        private suspend fun Wallpaper.getLocalPathFromContext(orientation: Int): File {
             val orientationWallpaper = if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 Wallpaper.ImageType.Landscape
             } else {
                 Wallpaper.ImageType.Portrait
             }
-            return Wallpaper.getLocalPath(name, orientationWallpaper)
+            return Wallpaper.getLocalPath(getFilesDir(), name, orientationWallpaper)
         }
     }
 
@@ -214,9 +232,8 @@ class WallpapersUseCases(
     internal class DefaultLoadThumbnailUseCase(private val filesDir: File) : LoadThumbnailUseCase {
         override suspend fun invoke(wallpaper: Wallpaper): Bitmap? = withContext(Dispatchers.IO) {
             Result.runCatching {
-                val path = Wallpaper.getLocalPath(wallpaper.name, Wallpaper.ImageType.Thumbnail)
+                val file = Wallpaper.getLocalPath(filesDir, wallpaper.name, Wallpaper.ImageType.Thumbnail)
                 withContext(Dispatchers.IO) {
-                    val file = File(filesDir, path)
                     BitmapFactory.decodeStream(file.inputStream())
                 }
             }.getOrNull()

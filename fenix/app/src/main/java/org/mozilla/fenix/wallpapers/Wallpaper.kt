@@ -5,6 +5,7 @@
 package org.mozilla.fenix.wallpapers
 
 import org.mozilla.fenix.utils.Settings
+import java.io.File
 import java.util.Date
 
 /**
@@ -96,6 +97,15 @@ data class Wallpaper(
             thumbnailFileState = ImageFileState.Downloaded,
             assetsFileState = ImageFileState.Downloaded,
         )
+        val LocalCollection = Collection(
+            name = "local",
+            heading = null,
+            description = null,
+            learnMoreUrl = null,
+            availableLocales = null,
+            startDate = null,
+            endDate = null,
+        )
 
         /**
          * Defines the standard path at which a wallpaper resource is kept on disk.
@@ -113,7 +123,7 @@ data class Wallpaper(
          * @param name The name of the wallpaper.
          * @param type The type of image that should be retrieved.
          */
-        fun getLocalPath(name: String, type: ImageType) = "wallpapers/$name/${type.lowercase()}.png"
+        fun getLocalPath(dir: File, name: String, type: ImageType) : File = if (name.startsWith("/")) File(name) else File(dir, "wallpapers/$name/${type.lowercase()}.png")
 
         /**
          * Generate a wallpaper from metadata cached in Settings.

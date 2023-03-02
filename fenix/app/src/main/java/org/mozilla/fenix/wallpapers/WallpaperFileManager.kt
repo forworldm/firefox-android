@@ -51,7 +51,7 @@ class WallpaperFileManager(
 
     private fun allAssetsExist(name: String): Boolean =
         Wallpaper.ImageType.values().all { type ->
-            File(storageRootDirectory, getLocalPath(name, type)).exists()
+            getLocalPath(storageRootDirectory, name, type).exists()
         }
 
     /**
